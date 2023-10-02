@@ -31,7 +31,6 @@ function create_custom_table() {
         email VARCHAR(255),
         company VARCHAR(255),
         country VARCHAR(255),
-        city VARCHAR(255),
         state VARCHAR(255),
         phone_number VARCHAR(20),
         job VARCHAR(255),
@@ -53,27 +52,25 @@ function delete_custom_table() {
 function handle_form_submission() {
     global $wpdb;
 
-    if (isset($_POST['et_pb_contactform_submit_0'])) { 
-        $data = array();
-        $data['first_name'] = sanitize_text_field($_POST['et_pb_contact_name_0']);
-        $data['last_name'] = sanitize_text_field($_POST['et_pb_contact_last_name_0']);
-        $data['email'] = sanitize_email($_POST['et_pb_contact_email_0']);
-        $data['company'] = sanitize_text_field($_POST['et_pb_contact_company_0']);
-        $data['country'] = sanitize_text_field($_POST['et_pb_contact_country_0']);
-        $data['city'] = sanitize_text_field($_POST['et_pb_contact_city_0']);
-        $data['state'] = sanitize_text_field($_POST['et_pb_contact_state_0']);
-        $data['phone_number'] = sanitize_text_field($_POST['et_pb_contact_phone_0']);
-        $data['job'] = sanitize_text_field($_POST['et_pb_contact_job_role_0']);
+     if (isset($_POST['et_pb_contactform_submit_0']) && isset($_POST['et_pb_contact_name_0'])) {
 
-        if (empty($data['first_name']) || empty($data['last_name']) || empty($data['email']) || empty($data['phone_number']) || empty($data['company']) || empty($data['country']) || empty($data['city']) ||
-        empty($data['state']) || empty($data['job']))
+        $first_name = sanitize_text_field($_POST['et_pb_contact_name_0']);
+        $last_name = sanitize_text_field($_POST['et_pb_contact_last_name_0']);
+        $email = sanitize_email($_POST['et_pb_contact_email_0']);
+        $company = sanitize_text_field($_POST['et_pb_contact_company_0']);
+        $country = sanitize_text_field($_POST['et_pb_contact_country_0']);
+        $city = sanitize_text_field($_POST['et_pb_contact_city_0']);
+        $state = sanitize_text_field($_POST['et_pb_contact_state_0']);
+        $phone_number = sanitize_text_field($_POST['et_pb_contact_phone_0']);
+        $job = sanitize_text_field($_POST['et_pb_contact_job_role_0']);
+ 
+        if (empty($first_name) || empty($last_name) || empty($email) || empty($phone_number) || empty($company) || empty($country) || empty($city) ||
+        empty($state) || empty($job))
         {            
             return; 
-        }
+        }      
         $current_datetime = current_time('mysql');
-
-        $response = insert_data_into_database($data);
-
+               
         $table_name = $wpdb->prefix . 'custom_table';
         $wpdb->insert(
             $table_name,
@@ -113,6 +110,7 @@ function custom_table_shortcode() {
         echo '<th style="border: 1px solid #ccc; padding: 10px; text-align: left; background-color: #f2f2f2;">Company</th>';
         echo '<th style="border: 1px solid #ccc; padding: 10px; text-align: left; background-color: #f2f2f2;">Country</th>';
         echo '<th style="border: 1px solid #ccc; padding: 10px; text-align: left; background-color: #f2f2f2;">State</th>';
+        echo '<th style="border: 1px solid #ccc; padding: 10px; text-align: left; background-color: #f2f2f2;">City</th>';
         echo '<th style="border: 1px solid #ccc; padding: 10px; text-align: left; background-color: #f2f2f2;">Phone Number</th>';
         echo '<th style="border: 1px solid #ccc; padding: 10px; text-align: left; background-color: #f2f2f2;">Job</th>';
         echo '<th style="border: 1px solid #ccc; padding: 10px; text-align: left; background-color: #f2f2f2;">Created At</th>'; // Added this line
@@ -129,6 +127,7 @@ function custom_table_shortcode() {
             echo '<td style="border: 1px solid #ccc; padding: 10px; text-align: left;">' . $row['company'] . '</td>';
             echo '<td style="border: 1px solid #ccc; padding: 10px; text-align: left;">' . $row['country'] . '</td>';
             echo '<td style="border: 1px solid #ccc; padding: 10px; text-align: left;">' . $row['state'] . '</td>';
+            echo '<td style="border: 1px solid #ccc; padding: 10px; text-align: left;">' . $row['city'] . '</td>';
             echo '<td style="border: 1px solid #ccc; padding: 10px; text-align: left;">' . $row['phone_number'] . '</td>';
             echo '<td style="border: 1px solid #ccc; padding: 10px; text-align: left;">' . $row['job'] . '</td>';
             echo '<td style="border: 1px solid #ccc; padding: 10px; text-align: left;">' . $row['created_at'] . '</td>'; // Display the created_at column
@@ -146,37 +145,3 @@ function custom_table_shortcode() {
 
 add_shortcode('custom_table', 'custom_table_shortcode');
 
-function submit_form_data_callback() {
-   
-    $first_name = sanitize_text_field($_POST['first_name']);
-    $last_name = sanitize_text_field($_POST['last_name']);
-    $email = sanitize_email($_POST['email']);
-    $company = sanitize_text_field($_POST['company']);
-    $country = sanitize_text_field($_POST['country']);
-    $state = sanitize_text_field($_POST['state']);
-    $phone_number = sanitize_text_field($_POST['phone_number']);
-    $job = sanitize_text_field($_POST['job']);
-    $current_datetime = current_time('mysql');
-    
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'custom_table'; 
-
-    $data = array(
-        'first_name' => $first_name,
-        'last_name' => $last_name,
-        'email' => $email,
-        'company' => $company,
-        'country' => $country,
-        'state' => $state,
-        'phone_number' => $phone_number,
-        'job' => $job,
-        'created_at' => $current_datetime,
-    );
-
-    $wpdb->insert($table_name, $data);
-
-    wp_die();
-}
-
-add_action('wp_ajax_submit_form_data', 'submit_form_data_callback');
-add_action('wp_ajax_nopriv_submit_form_data', 'submit_form_data_callback');
